@@ -34,60 +34,64 @@ Desenvolver um MVP de pipeline de dados em nuvem que consolide e processe dados 
 Os dados utilizados neste projeto são provenientes do Instituto Nacional de Meteorologia (INMET), obtidos a partir da base de dados históricos meteorológicos, que disponibiliza informações como: 
 O conjunto de dados utilizado neste projeto é composto por medições meteorológicas horárias, disponibilizadas pelo Instituto Nacional de Meteorologia (INMET). Cada registro representa uma observação realizada em uma estação meteorológica automática, referente a uma data e hora específicas (UTC).
 
-- Variáveis Temporais
-  
-Data: Data da observação meteorológica.
-
-Hora UTC: Hora da medição, expressa no fuso horário UTC, com registros horários ao longo do dia.
-
-- Precipitação
-  
-PRECIPITAÇÃO TOTAL, HORÁRIO (mm): Volume total de precipitação acumulada durante a hora de observação, medido em milímetros (mm).
-
-- Pressão Atmosférica
-
-PRESSÃO ATMOSFÉRICA AO NÍVEL DA ESTAÇÃO, HORÁRIA (mB): Valor da pressão atmosférica medida ao nível da estação meteorológica, registrado de forma horária.
-
-PRESSÃO ATMOSFÉRICA MÁXIMA NA HORA ANTERIOR (AUT) (mB): Maior valor de pressão atmosférica registrado na hora anterior à observação, obtido automaticamente.
-
-PRESSÃO ATMOSFÉRICA MÍNIMA NA HORA ANTERIOR (AUT) (mB): Menor valor de pressão atmosférica registrado na hora anterior à observação, obtido automaticamente.
-
-- Radiação Solar
-  
-RADIAÇÃO GLOBAL (kJ/m²): Quantidade total de radiação solar incidente na superfície durante o período de observação, expressa em quilojoules por metro quadrado.
-
-- Temperatura do Ar
-  
-TEMPERATURA DO AR – BULBO SECO, HORÁRIA (°C): Temperatura do ar medida diretamente pelo sensor, registrada de forma horária.
-
-TEMPERATURA MÁXIMA NA HORA ANTERIOR (AUT) (°C): Maior valor de temperatura do ar registrado na hora anterior à observação.
-
-TEMPERATURA MÍNIMA NA HORA ANTERIOR (AUT) (°C): Menor valor de temperatura do ar registrado na hora anterior à observação.
-
-- Ponto de Orvalho
-  
-TEMPERATURA DO PONTO DE ORVALHO (°C): Temperatura na qual o ar atinge a saturação de umidade, indicando a formação de condensação.
-
-TEMPERATURA DO ORVALHO MÁXIMA NA HORA ANTERIOR (AUT) (°C): Maior valor da temperatura do ponto de orvalho registrado na hora anterior.
-
-TEMPERATURA DO ORVALHO MÍNIMA NA HORA ANTERIOR (AUT) (°C): Menor valor da temperatura do ponto de orvalho registrado na hora anterior.
-
-- Umidade Relativa do Ar
-  
-UMIDADE RELATIVA DO AR, HORÁRIA (%): Percentual de umidade relativa do ar medido no momento da observação.
-
-UMIDADE RELATIVA MÁXIMA NA HORA ANTERIOR (AUT) (%): Maior valor de umidade relativa registrado na hora anterior.
-
-UMIDADE RELATIVA MÍNIMA NA HORA ANTERIOR (AUT) (%)> Menor valor de umidade relativa registrado na hora anterior.
-
-- Vento
-  
-VENTO, DIREÇÃO HORÁRIA (graus): Direção média do vento durante o período de observação, expressa em graus.
-
-VENTO, RAJADA MÁXIMA (m/s): Velocidade máxima de rajada de vento registrada na hora anterior.
-
-VENTO, VELOCIDADE HORÁRIA (m/s): Velocidade média do vento registrada de forma horária.
-
 # Desenvolvimento
+ Este MVP foi desenvolvido como parte da disciplina de Engenharia de Dados, com foco na validação de um pipeline mínimo, funcional e escalável. O projeto utiliza dados reais e aplica boas práticas de organização, processamento distribuído e análise de dados em nuvem.
 
-Este MVP foi desenvolvido como parte da disciplina de Engenharia de Dados, com foco na validação de um pipeline mínimo, funcional e escalável, utilizando dados reais e aplicando boas práticas de organização, processamento distribuído e análise de dados em nuvem.
+1. Coleta e Ingestão de Dados
+   
+A primeira etapa consistiu no acesso ao portal de dados históricos do INMET (Instituto Nacional de Meteorologia).
+
+- Fonte dos Dados Portal INMET - Dados Históricos (https://portal.inmet.gov.br/dadoshistoricos) 
+
+- Período 2021 a 2025.
+
+- Processo de Extração: Foram baixados arquivos compactados (.ZIP) contendo aproximadamente 584 arquivos CSV por ano, cada um representando uma estação meteorológica brasileira.
+
+- Tratamento Inicial: Para este MVP, foram selecionados exclusivamente os registros da cidade de Aracaju - SE.
+
+- Tecnologia:  Os dados foram carregados para o ambiente Databricks, onde foram processados utilizando Spark para garantir escalabilidade.
+
+2. Modelagem de Dados
+   
+Para este projeto, optou-se pela arquitetura de Data Lake com uma abordagem Flat (Tabela Única) por conceito. Essa escolha justifica-se pela natureza dos dados meteorológicos (séries temporais), facilitando o consumo imediato para análises exploratórias e modelos de Machine Learning, evitando joins complexos que poderiam degradar a performance em grandes volumes.
+### 3. Catálogo de Dados
+
+#### Variáveis Temporais e Meteorológicas
+| Coluna | Descrição | Domínio | Min/Max |
+| :--- | :--- | :--- | :--- |
+| Data | Data da observação meteorológica | AAAA-MM-DD | 2021 a 2025 |
+| Hora UTC | Hora da medição (UTC) | HHMM UTC | 00:00 a 23:00 |
+| Precipitação | Volume total acumulado | Real (mm) | 0 a 95.40 mm |
+
+#### Pressão Atmosférica (mB)
+| Coluna | Descrição | Min/Max Esperado |
+| :--- | :--- | :--- |
+| Pressão Estação | Pressão ao nível da estação | 900 a 1100 mB |
+| Pressão Máx | Maior valor na hora anterior | 900 a 1100 mB |
+| Pressão Mín | Menor valor na hora anterior | 900 a 1100 mB |
+
+#### Temperatura e Ponto de Orvalho (°C)
+| Coluna | Descrição | Min/Max Esperado |
+| :--- | :--- | :--- |
+| Temp. Bulbo Seco | Temperatura atual do ar | 10°C a 45°C |
+| Temp. Ponto Orvalho | Saturação de umidade | 5°C a 30°C |
+
+#### Umidade e Vento
+| Coluna | Descrição | Unidade | Min/Max |
+| :--- | :--- | :--- | :--- |
+| Umidade Relativa | Percentual de umidade | % | 10% a 100% |
+| Vento Direção | Direção média do vento | Graus | 0 a 360 |
+| Vento Velocidade | Velocidade média horária | m/s | 0 a 40 m/s |
+
+
+
+### Ranking dos Dias Mais Chuvosos (Aracaju)
+
+| Posição | Data       | Precipitação (mm) |
+| :------ | :--------- | :---------------- |
+| 1°      | 2024-05-07 | 95.40             |
+| 2°      | 2025-05-04 | 92.00             |
+| 3°      | 2021-01-30 | 82.40             |
+| 4°      | 2025-04-12 | 81.40             |
+| 5°      | 2025-05-20 | 74.20             |
+
