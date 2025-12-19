@@ -54,34 +54,63 @@ A primeira etapa consistiu no acesso ao portal de dados históricos do INMET (In
 2. Modelagem de Dados
    
 Para este projeto, optou-se pela arquitetura de Data Lake com uma abordagem Flat (Tabela Única) por conceito. Essa escolha justifica-se pela natureza dos dados meteorológicos (séries temporais), facilitando o consumo imediato para análises exploratórias e modelos de Machine Learning, evitando joins complexos que poderiam degradar a performance em grandes volumes.
-### 3. Catálogo de Dados
 
-#### Variáveis Temporais e Meteorológicas
-| Coluna | Descrição | Domínio | Min/Max |
-| :--- | :--- | :--- | :--- |
-| Data | Data da observação meteorológica | AAAA-MM-DD | 2021 a 2025 |
-| Hora UTC | Hora da medição (UTC) | HHMM UTC | 00:00 a 23:00 |
-| Precipitação | Volume total acumulado | Real (mm) | 0 a 95.40 mm |
+3. Catálogo de Dados
+   
+| Coluna                                               | Mínimo | Máximo | Dados faltantes | Total de registros |
+|------------------------------------------------------|--------|--------|-----------------|--------------------|
+| precipitao_total_horrio_mm                            | 0      | 48.6   | 10744           | 40896              |
+| pressao_atmosferica_ao_nivel_da_estacao_horaria_mb   | 1002.8 | 1024.2 | 10786           | 40896              |
+| presso_atmosferica_max_na_hora_ant_aut_mb            | 1003.4 | 1030.1 | 8100            | 40896              |
+| presso_atmosferica_min_na_hora_ant_aut_mb            | 995.7  | 1022.8 | 8100            | 40896              |
+| radiacao_global_kj_m                                 | 0      | 3253.9 | 23143           | 40896              |
+| temperatura_do_ar_bulbo_seco_horaria_c               | 19.7   | 39.4   | 18322           | 40896              |
+| temperatura_do_ponto_de_orvalho_c                    | -9.2   | 34.7   | 27433           | 40896              |
+| temperatura_mxima_na_hora_ant_aut_c                  | 19.9   | 36.4   | 18145           | 40896              |
+| temperatura_mnima_na_hora_ant_aut_c                  | 18.1   | 36.8   | 15678           | 40896              |
+| temperatura_orvalho_max_na_hora_ant_aut_c            | -9.1   | 35.1   | 27501           | 40896              |
+| temperatura_orvalho_min_na_hora_ant_aut_c            | -9.8   | 28.6   | 27517           | 40896              |
+| umidade_rel_max_na_hora_ant_aut                       | 8      | 100    | 19905           | 40896              |
+| umidade_rel_min_na_hora_ant_aut                       | 8      | 100    | 19926           | 40896              |
+| umidade_relativa_do_ar_horaria                       | 7      | 100    | 21079           | 40896              |
+| vento_direo_horaria_gr_gr                            | 1      | 360    | 10744           | 40896              |
+| vento_rajada_maxima_m_s                              | 0.7    | 20.3   | 10744           | 40896              |
+| vento_velocidade_horaria_m_s                         | 0.1    | 6.5    | 10744           | 40896              |
+| precipitao_total_mm                                  | 0      | 32     | 38252           | 40896              |
+| pressao_atmosferica_ao_nivel_da_estacao_mb           | 1002.7 | 1019.4 | 38252           | 40896              |
+| temperatura_do_ar_bulbo_seco_c                       | 21.1   | 31.1   | 38252           | 40896              |
+| umidade_relativa_do_ar                               | 14     | 100    | 39659           | 40896              |
+| vento                                                | 2      | 360    | 38252           | 40896              |
+| vento_maxima_m_s                                     | 1.4    | 12.3   | 38252           | 40896              |
+| vento_velocidade_m_s                                 | 0.3    | 6      | 38252           | 40896              |
 
-#### Pressão Atmosférica (mB)
-| Coluna | Descrição | Min/Max Esperado |
-| :--- | :--- | :--- |
-| Pressão Estação | Pressão ao nível da estação | 900 a 1100 mB |
-| Pressão Máx | Maior valor na hora anterior | 900 a 1100 mB |
-| Pressão Mín | Menor valor na hora anterior | 900 a 1100 mB |
+Os dados acima compõem a camada Silver/Gold do Data Lake. Optou-se por um modelo Flat (Tabela Fato Desnormalizada), visto que em análises de séries temporais meteorológicas, a performance de leitura e a integridade cronológica são priorizadas em relação à normalização excessiva de dimensões.
 
-#### Temperatura e Ponto de Orvalho (°C)
-| Coluna | Descrição | Min/Max Esperado |
-| :--- | :--- | :--- |
-| Temp. Bulbo Seco | Temperatura atual do ar | 10°C a 45°C |
-| Temp. Ponto Orvalho | Saturação de umidade | 5°C a 30°C |
+4. Carga
 
-#### Umidade e Vento
-| Coluna | Descrição | Unidade | Min/Max |
-| :--- | :--- | :--- | :--- |
-| Umidade Relativa | Percentual de umidade | % | 10% a 100% |
-| Vento Direção | Direção média do vento | Graus | 0 a 360 |
-| Vento Velocidade | Velocidade média horária | m/s | 0 a 40 m/s |
+A etapa de carga foi realizada utilizando o poder de processamento distribuído do Apache Spark dentro da plataforma Databricks. O pipeline seguiu o fluxo de Extração, Transformação e Carga (ETL) para garantir que os dados brutos fossem convertidos em um formato otimizado para consulta.
+
+Processo de ETL e Transformação
+A documentação do processo de transformação e carga seguiu os seguintes passos:
+
+Ingestão (Extract): Leitura dos arquivos .csv extraídos dos pacotes .zip do INMET. Os dados foram carregados inicialmente em um DataFrame Spark, preservando o esquema original.
+
+Filtragem e Seleção: Como o conjunto de dados original continha registros de todo o território nacional (584 arquivos por ano), foi aplicada uma transformação de filtragem para isolar apenas a estação meteorológica de Aracaju - SE.
+
+Limpeza e Conversão (Transform):
+
+Tipagem de Dados: Conversão de colunas de texto para formatos numéricos (Double) e temporais (Timestamp).
+
+Tratamento de Nulos: Identificação e tratamento do valor -9999 (padrão do INMET para dados ausentes), convertendo-os em null para evitar distorções nas métricas de mínimo e máximo.
+
+Normalização: Ajuste das colunas de data e hora para um formato único, permitindo a ordenação correta para o ranking de precipitação.
+
+Carga Final (Load): Os dados processados foram salvos no Data Lake em formato Parquet/Delta. Essa escolha técnica garante alta performance para consultas analíticas e compressão eficiente dos arquivos.
+
+Conciliação de Dados
+Para compor o ranking dos dias mais chuvosos e o catálogo de domínios, foi realizada a conciliação dos conjuntos de dados anuais (2021 a 2025).
+
+Técnica: Utilizou-se a união (Union) dos DataFrames anuais, seguida de uma agregação por data para consolidar a precipitação total diária, já que os dados originais são registrados de forma horária. Essa transformação foi essencial para validar a consistência histórica entre os diferentes arquivos baixados.
 
 
 
