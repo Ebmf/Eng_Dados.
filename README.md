@@ -1,5 +1,7 @@
 # MVP de Engenharia de Dados – Pipeline de Dados Climáticos
 
+## Aluno: Elvio Barreto
+
 Este repositório apresenta o desenvolvimento de um MVP para a disciplina de Engenharia de Dados, com foco na construção de um pipeline de dados em nuvem aplicado à análise de dados climáticos da cidade de Aracaju (SE).
 
 O objetivo do MVP é demonstrar, de forma prática e funcional, a implementação de um pipeline capaz de coletar, processar, armazenar e analisar dados meteorológicos históricos, aplicando conceitos fundamentais de engenharia de dados.
