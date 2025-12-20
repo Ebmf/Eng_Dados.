@@ -35,7 +35,8 @@ Os dados utilizados neste projeto são provenientes do Instituto Nacional de Met
 O conjunto de dados utilizado neste projeto é composto por medições meteorológicas horárias, disponibilizadas pelo Instituto Nacional de Meteorologia (INMET). Cada registro representa uma observação realizada em uma estação meteorológica automática, referente a uma data e hora específicas (UTC).
 
 # Desenvolvimento
- Este MVP foi desenvolvido como parte da disciplina de Engenharia de Dados, com foco na validação de um pipeline mínimo, funcional e escalável. O projeto utiliza dados reais e aplica boas práticas de organização, processamento distribuído e análise de dados em nuvem.
+
+Este MVP foi desenvolvido como parte da disciplina de Engenharia de Dados, com foco na validação de um pipeline mínimo, funcional e escalável. O projeto utiliza dados reais e aplica boas práticas de organização, processamento distribuído e análise de dados em nuvem.
 
 1. Coleta e Ingestão de Dados
    
@@ -83,6 +84,7 @@ Os dados acima compõem a camada Silver/Gold do Data Lake. Optou-se por um model
 A etapa de carga foi realizada utilizando o poder de processamento distribuído do Apache Spark dentro da plataforma Databricks. O pipeline seguiu o fluxo de Extração, Transformação e Carga (ETL) para garantir que os dados brutos fossem convertidos em um formato otimizado para consulta.
 
 Processo de ETL e Transformação
+
 A documentação do processo de transformação e carga seguiu os seguintes passos:
 
 - Ingestão : Leitura dos arquivos .csv extraídos dos pacotes .zip do INMET. Os dados foram carregados inicialmente em um DataFrame Spark, preservando o esquema original.
@@ -100,6 +102,7 @@ A documentação do processo de transformação e carga seguiu os seguintes pass
 5. Análise
 
 - Qualidade de dados
+  
 As variáveis medidas neste banco de dados, de modo geral, apresentam limitações de qualidade devido à significativa quantidade de dados faltantes. Na documentação disponível no site de origem, não foi possível identificar explicações detalhadas sobre as causas dessas ausências. Uma exceção plausível é a variável radiação global, cuja elevada taxa de dados faltantes se justifica pelo fato de sua medição depender diretamente da incidência de luz solar, resultando em valores nulos durante os períodos noturnos.
 
 O objetivo deste trabalho é avaliar o ranking dos dias mais chuvosos e dos dias mais frios e mais quentes da cidade de Aracaju. Nesse contexto, a variável precipitação horária apresenta 19,80% de dados faltantes. Embora seja uma das variáveis mais completas, a ausência de quase 20% dos registros indica que o ranking dos dias mais chuvosos pode não incluir aproximadamente 1 em cada 5 horas de medição.
@@ -108,6 +111,7 @@ Em relação à temperatura do ar, com taxa de dados faltantes entre 38,33% e 44
 Variáveis de Orvalho e Radiação (>56%): O alto índice de nulos nestas colunas inviabiliza análises de séries temporais contínuas, servindo apenas para consultas pontuais onde o dado está disponível.
 
 - Solução do problema
+  
 Com esta análise, foi possível calcular o ranking dos 10 dias mais quentes, mais frios e com maior precipitação no período de 2021 a 2025. A partir desses rankings, tornou-se viável inferir padrões de sazonalidade e compreender melhor a ocorrência desses fenômenos na região estudada.
   
 | Data       | Precipitação Total do Dia (mm) |
